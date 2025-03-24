@@ -4,14 +4,19 @@ from google.transit import gtfs_realtime_pb2
 feed = gtfs_realtime_pb2.FeedMessage()
 response = requests.get('https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs-g')
 feed.ParseFromString(response.content)
-# Iterate through entities to find vehicle positions
+
+# The API endpoint returns FeedEntity objects. These objects are either a trip update, a vehicle position, or an alert. It will contain a "trip_update" field if it is a trip update, a "vehicle" field if it is providing information about train movement, and an "alert" field if it is providing alerts.
+
+# Iterate through entities to find information 
 for entity in feed.entity:
-    if entity.HasField("vehicle"):
-        print(f"Entity: {entity}")
-        vehicle = entity.vehicle
-        print(f"Vehicle: {vehicle}")
-        trip = vehicle.trip
-        print(f"Trip: {trip}")
+    print(entity)
+    
+    # if entity.HasField("vehicle"):
+    #     print(f"Entity: {entity}")
+    #     vehicle = entity.vehicle
+    #     print(f"Vehicle: {vehicle}")
+    #     trip = vehicle.trip
+    #     print(f"Trip: {trip}")
 
         # Check if it's a G train
         # if "G" in trip.route_id:
