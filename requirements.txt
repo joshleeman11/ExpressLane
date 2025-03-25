@@ -7,3 +7,4 @@ requests==2.32.3
 urllib3==2.3.0
 Flask
 python-dotenv
+watchdog
