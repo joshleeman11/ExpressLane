@@ -1,26 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>G Trains</title>
-</head>
-<body>
-    <h1>G Trains Information</h1>
-    {% if g_trains %}
+    <head>
+        <meta charset="UTF-8" />
+        <title>F Trains</title>
+    </head>
+    <body>
+        <h1>F Train Times (Next Hour)</h1>
+        {% if f_train_arrivals %}
         <ul>
-            {% for train in g_trains %}
-                <li>
-                    <h2>Train ID: {{ train.train_id }}</h2>
-                    <p>Current Stop: {{ train.current_stop }}</p>
-                    <p>Latitude: {{ train.latitude }}</p>
-                    <p>Longitude: {{ train.longitude }}</p>
-                    <p>Timestamp: {{ train.timestamp }}</p>
-                    <hr>
-                </li>
-            {% endfor %}
+            {% for trip_id, trip_data in f_train_arrivals.items() %} {% for trip
+            in trip_data %}
+            <h2>Origin Time: {{ trip.origin_time }}</h2>
+            <h2>Direction: {{ trip.direction }}</h2>
+
+            {% if trip.stops %}
+            <h3>Stops:</h3>
+            <ul>
+                {% for stop in trip.stops %}
+                <li>{{ stop.stop_name }} - Arrival: {{ stop.arrival_time }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No stop information available for this trip.</p>
+            {% endif %}
+            <hr />
+            {% endfor %} {% endfor %}
         </ul>
-    {% else %}
-        <p>No G trains found.</p>
-    {% endif %}
-</body>
+        {% else %}
+        <p>No F trains found.</p>
+        {% endif %}
+    </body>
 </html>
