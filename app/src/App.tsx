@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Stop, FTrainArrivals } from "./types";
+import { Stop, FTrainArrivals } from "./types.ts";
 import StopSelector from "./components/StopSelector.tsx";
 import TrainSchedule from "./components/TrainSchedule.tsx";
 
@@ -12,10 +12,12 @@ function App() {
         // Fetch stops and train arrivals from your backend
         const fetchData = async () => {
             try {
-                const [stopsResponse, arrivalTimesResponse] = await Promise.all([
-                    fetch("http://127.0.0.1:5000/api/stops"),
-                    fetch("http://127.0.0.1:5000/api/arrivals"),
-                ]);
+                const [stopsResponse, arrivalTimesResponse] = await Promise.all(
+                    [
+                        fetch("http://127.0.0.1:5000/api/stops"),
+                        fetch("http://127.0.0.1:5000/api/arrivals"),
+                    ]
+                );
 
                 const stopsData = await stopsResponse.json();
                 setStops(stopsData);
@@ -32,9 +34,7 @@ function App() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">
-                F Train Times
-            </h1>
+            <h1 className="text-3xl font-bold mb-6">F Train Times</h1>
             <StopSelector
                 stops={stops}
                 selectedStop={selectedStop}

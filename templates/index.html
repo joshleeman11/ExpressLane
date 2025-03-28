@@ -5,6 +5,15 @@
         <title>F Trains</title>
     </head>
     <body>
+        <!-- Add dropdown menu -->
+        <select id="stopFilter" onchange="filterStops()">
+            <option value="all">All Stops</option>
+            {% for stop in all_stops %}
+            <option value="{{ stop.stop_id }}">{{ stop.stop_name }}</option>
+            <option value="{{ stop }}">{{ stop }}</option>
+            {% endfor %}
+        </select>
+
         <h1>F Train Times (Next Hour)</h1>
         {% if f_train_arrivals %}
         <ul>

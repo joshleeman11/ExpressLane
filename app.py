@@ -1,17 +1,24 @@
 from datetime import datetime
 import requests
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
+from flask_cors import CORS
 from google.transit import gtfs_realtime_pb2
 import csv
 
 app = Flask(__name__)
+CORS(app)
 
-# Create a dictionary to map stop_ids to stop names
 stops_dict = {}
 with open("gtfs_subway (1)/stops.txt", "r") as stops_file:
     stops_reader = csv.DictReader(stops_file)
     for row in stops_reader:
         stops_dict[row["stop_id"]] = row["stop_name"]
+
+@app.route("/api/stops", methods=["GET"])
+def get_stops():
+    # Convert set to list before jsonifying
+    return jsonify(list(set(stops_dict.values())))
+
 
 feed = gtfs_realtime_pb2.FeedMessage()
 response = requests.get(
@@ -47,7 +54,7 @@ def decode_trip_id(trip_id):
     }
 
 
-@app.route("/")
+@app.route("/api/arrivals")
 def index():
     g_trains = []
     f_train_arrivals = {}  # Move this outside the loop
@@ -113,9 +120,13 @@ def index():
                     }
                 )
 
-    return render_template(
-        "index.html", g_trains=g_trains, f_train_arrivals=f_train_arrivals
-    )
+    return jsonify(f_train_arrivals)
+    # return render_template(
+    #     "index.html",
+    #     g_trains=g_trains,
+    #     f_train_arrivals=f_train_arrivals,
+    #     all_stops=set(stops_dict.values()),
+    # )
 
 
 if __name__ == "__main__":
