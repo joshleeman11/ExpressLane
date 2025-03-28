@@ -1,12 +1,16 @@
 import React from "react";
-import { FTrainArrivals } from "../types";
+import { FTrainArrivals, Stop } from "../types";
 
 interface TrainScheduleProps {
     trainArrivals: FTrainArrivals;
-    selectedStop: string;
+    favoriteStops: Stop[];
 }
 
-function TrainSchedule({ trainArrivals, selectedStop }: TrainScheduleProps) {
+const TrainSchedule: React.FC<TrainScheduleProps> = ({
+    trainArrivals,
+    favoriteStops,
+}) => {
+
     // Group all arrivals by stop
     const stopsMap = new Map<
         string,
@@ -35,37 +39,45 @@ function TrainSchedule({ trainArrivals, selectedStop }: TrainScheduleProps) {
     );
 
     return (
-        <div className="space-y-6">
-            {stops.map(([stopName, arrivals]) => {
-                if (selectedStop !== "all" && stopName !== selectedStop) {
+        <div>
+            <div className="space-y-6">
+                <h1 className="text-2xl font-bold mb-4">Favorite Train Times</h1>
+                {stops.map(([stopName, arrivals]) => {
+
+                    if (favoriteStops.includes(stopName)) {
+                        // Sort arrivals by time
+                        const sortedArrivals = [...arrivals].sort((a, b) =>
+                            a.time.localeCompare(b.time)
+                        );
+
+                        return (
+                            <div
+                                key={stopName}
+                                className="border rounded p-4 hover:shadow-md transition-shadow"
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl font-semibold">
+                                        {stopName}
+                                    </h2>
+                                </div>
+                                <ul className="space-y-2">
+                                    {sortedArrivals.map((arrival, index) => (
+                                        <li
+                                            key={index}
+                                            className="text-gray-700"
+                                        >
+                                            {arrival.time} - {arrival.direction}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        );
+                    }
                     return null;
-                }
-
-                // Sort arrivals by time
-                const sortedArrivals = [...arrivals].sort((a, b) =>
-                    a.time.localeCompare(b.time)
-                );
-
-                return (
-                    <div key={stopName} className="border rounded p-4">
-                        <h2 className="text-xl font-semibold mb-4">
-                            {stopName}
-                        </h2>
-                        <ul className="space-y-2">
-                            {sortedArrivals.map((arrival, index) => (
-                                <li key={index} className="text-gray-700">
-                                    {arrival.time} - {arrival.direction}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                );
-            })}
-            {stops.length === 0 && (
-                <p className="text-gray-500">No F trains found.</p>
-            )}
+                })}
+            </div>
         </div>
     );
-}
+};
 
 export default TrainSchedule;
