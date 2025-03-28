@@ -6,12 +6,50 @@ import Login from "./components/Login.tsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext.tsx";
 import { getFavoriteStops, toggleFavoriteStop } from "./firebase/db.ts";
 import FavoriteStops from "./components/FavoriteStops.tsx";
+import "leaflet/dist/leaflet.css";
+import L, { map, latLng, tileLayer, MapOptions, marker } from "leaflet";
+
+const options: MapOptions = {
+    center: latLng(40.731253, -73.996139),
+    zoom: 12,
+};
+
+const key = "iHukbAthWy4RZzd62OxA";
 
 function AppContent() {
     const [stops, setStops] = useState<Stop[]>([]);
     const [trainArrivals, setTrainArrivals] = useState<FTrainArrivals>({});
     const [favoriteStops, setFavoriteStops] = useState<Stop[]>([]);
     const { user } = useAuth();
+
+    useEffect(() => {
+        // Initialize map after component mounts
+        const mymap = map("map", options);
+
+        tileLayer(
+            `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${key}`,
+            {
+                tileSize: 512,
+                zoomOffset: -1,
+                minZoom: 1,
+                attribution:
+                    '\u003ca href="https://www.maptiler.com/copyright/" target="_blank"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href="https://www.openstreetmap.org/copyright" target="_blank"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e',
+                crossOrigin: true,
+            }
+        ).addTo(mymap);
+
+        const leafIcon = L.icon({
+            iconUrl: "https://docs.maptiler.com/sdk-js/examples/custom-points-icon-png/underground.png", //your custom pin
+            iconSize: [24, 26],
+        });
+
+        marker([40.732338, -74.000495], { icon: leafIcon }).addTo(mymap);
+
+        // Cleanup function to remove map when component unmounts
+        return () => {
+            mymap.remove();
+        };
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -64,22 +102,28 @@ function AppContent() {
     return (
         <div className="container mx-auto px-4 py-8">
             <Login />
-            <div className="flex flex-row gap-4 justify-between">
-                <StopSelector
-                    stops={stops}
-                    favoriteStops={favoriteStops}
-                    onToggleFavorite={handleToggleFavorite}
-                />
-                <FavoriteStops
-                    favoriteStops={favoriteStops}
-                    onToggleFavorite={handleToggleFavorite}
-                />
-            </div>
+            <div className="flex flex-col gap-8">
+                <div className="flex flex-row gap-4 justify-between">
+                    <StopSelector
+                        stops={stops}
+                        favoriteStops={favoriteStops}
+                        onToggleFavorite={handleToggleFavorite}
+                    />
+                    <FavoriteStops
+                        favoriteStops={favoriteStops}
+                        onToggleFavorite={handleToggleFavorite}
+                    />
+                </div>
 
-            <TrainSchedule
-                trainArrivals={trainArrivals}
-                favoriteStops={favoriteStops}
-            />
+                <div id="map" className="rounded-lg shadow-md"></div>
+
+                <div>
+                    <TrainSchedule
+                        trainArrivals={trainArrivals}
+                        favoriteStops={favoriteStops}
+                    />
+                </div>
+            </div>
         </div>
     );
 }
