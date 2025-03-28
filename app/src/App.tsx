@@ -2,14 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Stop, FTrainArrivals } from "./types.ts";
 import StopSelector from "./components/StopSelector.tsx";
 import TrainSchedule from "./components/TrainSchedule.tsx";
+import Login from "./components/Login.tsx";
+import { AuthProvider, useAuth } from "./contexts/AuthContext.tsx";
+import { getFavoriteStops, toggleFavoriteStop } from "./firebase/db.ts";
+import FavoriteStops from "./components/FavoriteStops.tsx";
 
-function App() {
+function AppContent() {
     const [stops, setStops] = useState<Stop[]>([]);
     const [trainArrivals, setTrainArrivals] = useState<FTrainArrivals>({});
-    const [selectedStop, setSelectedStop] = useState<string>("all");
+    const [favoriteStops, setFavoriteStops] = useState<Stop[]>([]);
+    const { user } = useAuth();
 
     useEffect(() => {
-        // Fetch stops and train arrivals from your backend
         const fetchData = async () => {
             try {
                 const [stopsResponse, arrivalTimesResponse] = await Promise.all(
@@ -32,19 +36,59 @@ function App() {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        const fetchFavoriteStops = async () => {
+            if (user) {
+                const favoriteStops = await getFavoriteStops(user);
+                console.log("favoriteStops", favoriteStops);
+                setFavoriteStops(favoriteStops);
+            }
+        };
+        fetchFavoriteStops();
+    }, [user]);
+
+    const handleToggleFavorite = async (stop: Stop) => {
+        if (user) {
+            // Optimistically update the UI
+            setFavoriteStops((prev) =>
+                prev.includes(stop)
+                    ? prev.filter((s) => s !== stop)
+                    : [...prev, stop]
+            );
+
+            // Update the database
+            await toggleFavoriteStop(user, stop);
+        }
+    };
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">F Train Times</h1>
-            <StopSelector
-                stops={stops}
-                selectedStop={selectedStop}
-                onStopChange={setSelectedStop}
-            />
+            <Login />
+            <div className="flex flex-row gap-4 justify-between">
+                <StopSelector
+                    stops={stops}
+                    favoriteStops={favoriteStops}
+                    onToggleFavorite={handleToggleFavorite}
+                />
+                <FavoriteStops
+                    favoriteStops={favoriteStops}
+                    onToggleFavorite={handleToggleFavorite}
+                />
+            </div>
+
             <TrainSchedule
                 trainArrivals={trainArrivals}
-                selectedStop={selectedStop}
+                favoriteStops={favoriteStops}
             />
         </div>
+    );
+}
+
+function App() {
+    return (
+        <AuthProvider>
+            <AppContent />
+        </AuthProvider>
     );
 }
 
