@@ -45,21 +45,21 @@ function AppContent() {
 
         // marker([40.732338, -74.000495], { icon: leafIcon }).addTo(mymap);
 
-        fetch("stops.txt") // Replace with the correct file path
+        fetch("stops.txt") // File path
             .then((response) => response.text())
             .then((data) => {
                 const lines = data.trim().split("\n"); // Split file into lines
 
                 lines.forEach((line) => {
-                const values = line.trim().split(","); // Split by whitespace
-                // const name = values[1];
-                const lat = parseFloat(values[2]); // Second last value
-                const lng = parseFloat(values[3]); // Last value
+                const values = line.trim().split(","); // Split by commas
+                // const name = values[1];  // Stop names
+                const lat = parseFloat(values[2]); // Third last value
+                const lng = parseFloat(values[3]); // Forth value
                 
                 if (!isNaN(lat) && !isNaN(lng)) {
                     marker([lat, lng], { icon: leafIcon })
                     .addTo(mymap);
-                    // .bindTooltip(name).openPopup();
+                    // .bindTooltip(name).openPopup();  // Display stop names
                 }
                 });
             })
