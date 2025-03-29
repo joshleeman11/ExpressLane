@@ -43,7 +43,27 @@ function AppContent() {
             iconSize: [24, 26],
         });
 
-        marker([40.732338, -74.000495], { icon: leafIcon }).addTo(mymap);
+        // marker([40.732338, -74.000495], { icon: leafIcon }).addTo(mymap);
+
+        fetch("stops.txt") // Replace with the correct file path
+            .then((response) => response.text())
+            .then((data) => {
+                const lines = data.trim().split("\n"); // Split file into lines
+
+                lines.forEach((line) => {
+                const values = line.trim().split(","); // Split by whitespace
+                // const name = values[1];
+                const lat = parseFloat(values[2]); // Second last value
+                const lng = parseFloat(values[3]); // Last value
+                
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    marker([lat, lng], { icon: leafIcon })
+                    .addTo(mymap);
+                    // .bindTooltip(name).openPopup();
+                }
+                });
+            })
+            .catch((error) => console.error("Error loading points:", error));
 
         // Cleanup function to remove map when component unmounts
         return () => {
