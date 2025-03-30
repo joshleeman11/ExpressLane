@@ -13,7 +13,7 @@ def shortest_path(graph, pointA, pointB):
         visited.add(curr_stop)
         path = path + [curr_stop] # new path
         
-        if curr_stop == end:
+        if curr_stop == pointB:
             return path # returns the shortest path
         
         for neighbor, distance in graph[curr_stop].items():
