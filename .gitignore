@@ -1,3 +1,5 @@
 # Virtual environment
 venv/
 node_modules/
+__pycache__/
+*.pyc
