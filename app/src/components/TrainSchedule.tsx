@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FTrainArrivals, Stop } from "../types";
 import { useAuth } from "../contexts/AuthContext.tsx";
 
@@ -50,6 +50,7 @@ const TrainSchedule: React.FC<TrainScheduleProps> = ({
     stopsRequested,
 }) => {
     const { user } = useAuth();
+    const [currentStopIndex, setCurrentStopIndex] = useState(0);
     // Group all arrivals by stop
     const stopsMap = new Map<
         string,
@@ -77,16 +78,89 @@ const TrainSchedule: React.FC<TrainScheduleProps> = ({
         a.localeCompare(b)
     );
 
+    const filteredStops = allStops.filter(([stopName]) =>
+        stopsRequested.includes(stopName)
+    );
+
+    const handlePreviousStop = () => {
+        setCurrentStopIndex((prev) =>
+            prev === 0 ? 0 : prev - 1
+        );
+    };
+
+    const handleNextStop = () => {
+        setCurrentStopIndex((prev) =>
+            prev === filteredStops.length - 1 ? filteredStops.length - 1 : prev + 1
+        );
+    };
+
     return (
-        <div>
-            <div className="space-y-6">
-                <h1 className="text-2xl font-bold mb-4">
-                    {user
-                        ? "Favorite Train Times"
-                        : "Selected Stop Train Times"}
-                </h1>
-                {allStops.map(([stopName, arrivals]) => {
-                    if (stopsRequested.includes(stopName)) {
+        <div className="bg-gray-900 text-white rounded-lg shadow-xl">
+            <div className="p-6 border-b border-gray-800">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <h2 className="text-xl font-semibold">
+                            {user ? "Scheduled Stops" : "Selected Stop"}
+                        </h2>
+                        {filteredStops.length > 1 && (
+                            <div className="flex items-center space-x-2">
+                                <button
+                                    onClick={handlePreviousStop}
+                                    className="p-2 rounded-full hover:bg-gray-800 transition-colors"
+                                    aria-label="Previous stop"
+                                >
+                                    <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M15 19l-7-7 7-7"
+                                        />
+                                    </svg>
+                                </button>
+                                <span className="text-sm text-gray-400">
+                                    {currentStopIndex + 1} /{" "}
+                                    {filteredStops.length}
+                                </span>
+                                <button
+                                    onClick={handleNextStop}
+                                    className="p-2 rounded-full hover:bg-gray-800 transition-colors"
+                                    aria-label="Next stop"
+                                >
+                                    <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 5l7 7-7 7"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                        {new Date().toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                        })}
+                    </div>
+                </div>
+            </div>
+            <div className="p-6">
+                {filteredStops.map(([stopName, arrivals], index) => {
+                    if (index === currentStopIndex) {
                         // Filter arrivals to current hour and sort by time
                         const currentHourArrivals = arrivals.filter((arrival) =>
                             isWithinCurrentHour(arrival.time)
@@ -103,26 +177,36 @@ const TrainSchedule: React.FC<TrainScheduleProps> = ({
                         return (
                             <div
                                 key={stopName}
-                                className="border rounded p-4 hover:shadow-md transition-shadow"
+                                className="bg-gray-800 rounded-lg p-4"
                             >
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl font-semibold">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-lg font-medium text-blue-400">
                                         {stopName}
-                                    </h2>
+                                    </h3>
+                                    <span className="text-sm text-gray-400">
+                                        {sortedArrivals.length} arrivals
+                                    </span>
                                 </div>
-                                <ul className="space-y-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {sortedArrivals.map((arrival, index) => (
-                                        <li
+                                        <div
                                             key={index}
-                                            className="text-gray-700"
+                                            className="flex items-center space-x-3 bg-gray-700 rounded-lg px-4 py-2"
                                         >
-                                            {convertToStandardTime(
-                                                arrival.time
-                                            )}{" "}
-                                            - {arrival.direction}
-                                        </li>
+                                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                            <div>
+                                                <div className="font-mono text-lg">
+                                                    {convertToStandardTime(
+                                                        arrival.time
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-gray-400">
+                                                    {arrival.direction}
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))}
-                                </ul>
+                                </div>
                             </div>
                         );
                     }

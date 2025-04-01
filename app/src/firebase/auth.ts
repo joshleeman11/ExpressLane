@@ -1,7 +1,3 @@
-import {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-} from "firebase/auth";
 import { auth } from "./config.ts";
 import {
     GoogleAuthProvider,

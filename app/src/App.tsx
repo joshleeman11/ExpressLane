@@ -49,10 +49,6 @@ function AppContent() {
         fetchFavoriteStops();
     }, [user]);
 
-    const handleSelectStop = (stop: Stop) => {
-        setSelectedStop(stop);
-    };
-
     const handleToggleFavorite = async (stop: Stop) => {
         if (user) {
             // Optimistically update the UI
@@ -68,29 +64,87 @@ function AppContent() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <Login />
-            <div className="flex flex-row gap-4 justify-between">
-                <StopSelector
-                    stops={stops}
-                    favoriteStops={favoriteStops}
-                    onToggleFavorite={handleToggleFavorite}
-                    onSelectStop={handleSelectStop}
-                />
-                {user && (
-                    <FavoriteStops
-                        favoriteStops={favoriteStops}
-                        onToggleFavorite={handleToggleFavorite}
-                    />
-                )}
+        <div className="min-h-screen bg-gray-950 text-white">
+            {/* Header Section */}
+            <div className="bg-gray-900 border-b border-gray-800">
+                <div className="container mx-auto px-4 py-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                                <svg
+                                    className="w-6 h-6 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                                    />
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold text-white">
+                                    ExpressLane
+                                </h1>
+                                <p className="text-sm text-gray-400">
+                                    Real-time train schedules
+                                </p>
+                            </div>
+                        </div>
+                        <div className="bg-gray-800 rounded-lg p-2 shadow-lg">
+                            <Login />
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <TrainSchedule
-                trainArrivals={trainArrivals}
-                stopsRequested={
-                    user ? favoriteStops : selectedStop ? [selectedStop] : []
-                }
-            />
+            {/* Main Content */}
+            <div className="container mx-auto px-4 py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Sidebar */}
+                    <div className="lg:col-span-3 space-y-6">
+                        <div className="sticky top-8 space-y-6">
+                            {user && (
+                                <div className="bg-gray-900 rounded-xl shadow-xl overflow-hidden">
+                                    <div className="p-4">
+                                        <FavoriteStops
+                                            favoriteStops={favoriteStops}
+                                            onToggleFavorite={
+                                                handleToggleFavorite
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            <StopSelector
+                                stops={stops}
+                                onSelectStop={setSelectedStop}
+                                favoriteStops={favoriteStops}
+                                onToggleFavorite={handleToggleFavorite}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="lg:col-span-9">
+                        <div className="bg-gray-900 rounded-xl shadow-xl overflow-hidden">
+                            <TrainSchedule
+                                trainArrivals={trainArrivals}
+                                stopsRequested={
+                                    user
+                                        ? favoriteStops
+                                        : selectedStop
+                                        ? [selectedStop]
+                                        : []
+                                }
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

@@ -21,7 +21,7 @@ const FavoriteStops: React.FC<FavoriteStopsProps> = ({
             {favoriteStops.map((stop) => (
                 <div
                     key={stop}
-                    className={`flex items-center justify-between hover:bg-gray-50 cursor-pointer`}
+                    className={`flex items-center justify-between cursor-pointer`}
                 >
                     <h1>{stop}</h1>
                     <FavoriteToggle
