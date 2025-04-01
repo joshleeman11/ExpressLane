@@ -22,27 +22,25 @@ const getMinutesSinceMidnight = (time: string): number => {
     return adjustedHours * 60 + minutes;
 };
 
-const isWithinCurrentHour = (time: string): boolean => {
+const isWithinCurrentHour = (time: string) => {
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinutes = now.getMinutes();
 
+    // Parse the arrival time (format: "HH:MM")
     const [hours, minutes] = time.split(":").map(Number);
 
-    // If the hour is less than 6, it's the next day
-    const adjustedHours = hours < 6 ? hours + 24 : hours;
-
-    // Check if the time is in the current hour or next hour
-    if (adjustedHours !== currentHour && adjustedHours !== currentHour + 1)
-        return false;
-
-    // If it's the current hour, only show times after current minutes
-    if (adjustedHours === currentHour) {
-        return minutes >= currentMinutes;
+    // If the arrival time is in the current hour and after current minutes
+    if (hours === currentHour && minutes >= currentMinutes) {
+        return true;
     }
 
-    // If it's the next hour, show all times
-    return true;
+    // If the arrival time is in the next hour
+    if (hours === (currentHour + 1) % 24) {
+        return true;
+    }
+
+    return false;
 };
 
 const TrainSchedule: React.FC<TrainScheduleProps> = ({
@@ -83,14 +81,14 @@ const TrainSchedule: React.FC<TrainScheduleProps> = ({
     );
 
     const handlePreviousStop = () => {
-        setCurrentStopIndex((prev) =>
-            prev === 0 ? 0 : prev - 1
-        );
+        setCurrentStopIndex((prev) => (prev === 0 ? 0 : prev - 1));
     };
 
     const handleNextStop = () => {
         setCurrentStopIndex((prev) =>
-            prev === filteredStops.length - 1 ? filteredStops.length - 1 : prev + 1
+            prev === filteredStops.length - 1
+                ? filteredStops.length - 1
+                : prev + 1
         );
     };
 
