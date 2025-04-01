@@ -13,21 +13,27 @@ export const addStopToUser = async (uid: string, stop: Stop) => {
         console.error("Error adding stop to user:", error);
         throw error;
     }
-}
+};
 
-export const addUserToDB = async (user: User) => {
+export const createNewUser = async (user: User) => {
     try {
         const userRef = doc(db, "users", user.uid);
-        await setDoc(userRef, {
-            email: user.email,
-            displayName: user.displayName,
-            stops: [],
-        });
+        const docSnap = await getDoc(userRef);
+
+        if (!docSnap.exists()) {
+            await setDoc(userRef, {
+                email: user.email,
+                displayName: user.displayName,
+                stops: [],
+            });
+            return true; // New user created
+        }
+        return false; // User already exists
     } catch (error) {
-        console.error("Error adding user to DB:", error);
+        console.error("Error creating new user:", error);
         throw error;
     }
-}
+};
 
 export const getFavoriteStops = async (user: User) => {
     const userDoc = doc(db, "users", user.uid);

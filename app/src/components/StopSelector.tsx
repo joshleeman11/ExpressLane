@@ -1,18 +1,21 @@
 import { Stop } from "../types";
 import React, { useState } from "react";
 import FavoriteToggle from "./FavoriteToggle.tsx";
-
+import { useAuth } from "../contexts/AuthContext.tsx";
 interface StopSelectorProps {
     stops: Stop[];
-    favoriteStops: Stop[];
+    favoriteStops?: Stop[];
     onToggleFavorite: (stop: Stop) => void;
+    onSelectStop: (stop: Stop) => void;
 }
 
 const StopSelector: React.FC<StopSelectorProps> = ({
     stops,
     favoriteStops,
     onToggleFavorite,
+    onSelectStop,
 }) => {
+    const { user } = useAuth();
     const [searchQuery, setSearchQuery] = useState("");
 
     const filteredStops = stops.filter((stop) =>
@@ -33,14 +36,21 @@ const StopSelector: React.FC<StopSelectorProps> = ({
                 {filteredStops.map((stop) => (
                     <div
                         key={stop}
-                        className={`flex items-center justify-between p-2 hover:bg-gray-50 cursor-pointer`}
+                        onClick={() => onSelectStop(stop)}
+                        className={`flex items-center justify-between p-2 ${
+                            !user ? "hover:bg-gray-50 cursor-pointer" : ""
+                        }`}
                     >
                         <span>{stop}</span>
-                        <FavoriteToggle
-                            stop={stop}
-                            isFavorite={favoriteStops.includes(stop)}
-                            onToggle={onToggleFavorite}
-                        />
+                        {user && (
+                            <FavoriteToggle
+                                stop={stop}
+                                isFavorite={
+                                    favoriteStops?.includes(stop) ?? false
+                                }
+                                onToggle={onToggleFavorite}
+                            />
+                        )}
                     </div>
                 ))}
             </div>

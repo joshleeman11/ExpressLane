@@ -1,16 +1,55 @@
 import React from "react";
 import { FTrainArrivals, Stop } from "../types";
+import { useAuth } from "../contexts/AuthContext.tsx";
 
 interface TrainScheduleProps {
     trainArrivals: FTrainArrivals;
-    favoriteStops: Stop[];
+    stopsRequested: Stop[];
 }
+
+const convertToStandardTime = (militaryTime: string): string => {
+    const [hours, minutes] = militaryTime.split(":").map(Number);
+    const period = hours >= 12 ? "PM" : "AM";
+    const standardHours = hours % 12 || 12;
+    return `${standardHours}:${minutes.toString().padStart(2, "0")} ${period}`;
+};
+
+const getMinutesSinceMidnight = (time: string): number => {
+    const [hours, minutes] = time.split(":").map(Number);
+    // If the hour is less than 6 (early morning), assume it's the next day
+    // This ensures 11 PM comes before 12 AM
+    const adjustedHours = hours < 6 ? hours + 24 : hours;
+    return adjustedHours * 60 + minutes;
+};
+
+const isWithinCurrentHour = (time: string): boolean => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+
+    const [hours, minutes] = time.split(":").map(Number);
+
+    // If the hour is less than 6, it's the next day
+    const adjustedHours = hours < 6 ? hours + 24 : hours;
+
+    // Check if the time is in the current hour or next hour
+    if (adjustedHours !== currentHour && adjustedHours !== currentHour + 1)
+        return false;
+
+    // If it's the current hour, only show times after current minutes
+    if (adjustedHours === currentHour) {
+        return minutes >= currentMinutes;
+    }
+
+    // If it's the next hour, show all times
+    return true;
+};
 
 const TrainSchedule: React.FC<TrainScheduleProps> = ({
     trainArrivals,
-    favoriteStops,
+    stopsRequested,
 }) => {
-
+    const { user } = useAuth();
     // Group all arrivals by stop
     const stopsMap = new Map<
         string,
@@ -34,20 +73,31 @@ const TrainSchedule: React.FC<TrainScheduleProps> = ({
     });
 
     // Convert to array and sort by stop name
-    const stops = Array.from(stopsMap.entries()).sort(([a], [b]) =>
+    const allStops = Array.from(stopsMap.entries()).sort(([a], [b]) =>
         a.localeCompare(b)
     );
 
     return (
         <div>
             <div className="space-y-6">
-                <h1 className="text-2xl font-bold mb-4">Favorite Train Times</h1>
-                {stops.map(([stopName, arrivals]) => {
+                <h1 className="text-2xl font-bold mb-4">
+                    {user
+                        ? "Favorite Train Times"
+                        : "Selected Stop Train Times"}
+                </h1>
+                {allStops.map(([stopName, arrivals]) => {
+                    if (stopsRequested.includes(stopName)) {
+                        // Filter arrivals to current hour and sort by time
+                        const currentHourArrivals = arrivals.filter((arrival) =>
+                            isWithinCurrentHour(arrival.time)
+                        );
 
-                    if (favoriteStops.includes(stopName)) {
-                        // Sort arrivals by time
-                        const sortedArrivals = [...arrivals].sort((a, b) =>
-                            a.time.localeCompare(b.time)
+                        const sortedArrivals = [...currentHourArrivals].sort(
+                            (a, b) => {
+                                const timeA = getMinutesSinceMidnight(a.time);
+                                const timeB = getMinutesSinceMidnight(b.time);
+                                return timeA - timeB;
+                            }
                         );
 
                         return (
@@ -66,7 +116,10 @@ const TrainSchedule: React.FC<TrainScheduleProps> = ({
                                             key={index}
                                             className="text-gray-700"
                                         >
-                                            {arrival.time} - {arrival.direction}
+                                            {convertToStandardTime(
+                                                arrival.time
+                                            )}{" "}
+                                            - {arrival.direction}
                                         </li>
                                     ))}
                                 </ul>

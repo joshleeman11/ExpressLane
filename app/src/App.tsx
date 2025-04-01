@@ -11,6 +11,7 @@ function AppContent() {
     const [stops, setStops] = useState<Stop[]>([]);
     const [trainArrivals, setTrainArrivals] = useState<FTrainArrivals>({});
     const [favoriteStops, setFavoriteStops] = useState<Stop[]>([]);
+    const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
     const { user } = useAuth();
 
     useEffect(() => {
@@ -40,12 +41,17 @@ function AppContent() {
         const fetchFavoriteStops = async () => {
             if (user) {
                 const favoriteStops = await getFavoriteStops(user);
-                console.log("favoriteStops", favoriteStops);
                 setFavoriteStops(favoriteStops);
+            } else {
+                setFavoriteStops([]);
             }
         };
         fetchFavoriteStops();
     }, [user]);
+
+    const handleSelectStop = (stop: Stop) => {
+        setSelectedStop(stop);
+    };
 
     const handleToggleFavorite = async (stop: Stop) => {
         if (user) {
@@ -69,16 +75,21 @@ function AppContent() {
                     stops={stops}
                     favoriteStops={favoriteStops}
                     onToggleFavorite={handleToggleFavorite}
+                    onSelectStop={handleSelectStop}
                 />
-                <FavoriteStops
-                    favoriteStops={favoriteStops}
-                    onToggleFavorite={handleToggleFavorite}
-                />
+                {user && (
+                    <FavoriteStops
+                        favoriteStops={favoriteStops}
+                        onToggleFavorite={handleToggleFavorite}
+                    />
+                )}
             </div>
 
             <TrainSchedule
                 trainArrivals={trainArrivals}
-                favoriteStops={favoriteStops}
+                stopsRequested={
+                    user ? favoriteStops : selectedStop ? [selectedStop] : []
+                }
             />
         </div>
     );
