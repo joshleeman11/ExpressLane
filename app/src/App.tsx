@@ -17,21 +17,13 @@ function AppContent() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [stopsResponse, arrivalTimesResponse] = await Promise.all([
-          fetch("http://127.0.0.1:5000/api/stops"),
-          fetch("http://127.0.0.1:5000/api/arrivals"),
-        ]);
-
+        const stopsResponse = await fetch("http://127.0.0.1:5000/api/stops");
         const stopsData = await stopsResponse.json();
         setStops(stopsData);
-
-        const arrivalTimesData = await arrivalTimesResponse.json();
-        setTrainArrivals(arrivalTimesData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
   }, []);
 
@@ -46,6 +38,20 @@ function AppContent() {
     };
     fetchFavoriteStops();
   }, [user]);
+
+  const handleSelectStop = async (stop: Stop) => {
+    setSelectedStop(stop);
+    try {
+      console.log(stop);
+      const response = await fetch(
+        `http://127.0.0.1:5000/api/arrivals/${stop[1]}`
+      );
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching stop data:", error);
+    }
+  };
 
   const handleToggleFavorite = async (stop: Stop) => {
     if (user) {
@@ -113,7 +119,7 @@ function AppContent() {
               )}
               <StopSelector
                 stops={stops}
-                onSelectStop={setSelectedStop}
+                onSelectStop={handleSelectStop}
                 favoriteStops={favoriteStops}
                 onToggleFavorite={handleToggleFavorite}
               />
