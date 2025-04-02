@@ -29,9 +29,11 @@ def get_stops():
     # Query db for stops
     conn = get_db_connection()
     cur = conn.cursor()
+    # just FYI -- two or more station names might show up. this is fine, as they are actually slightly different in coordinates and will show up with the same name, but different locations, on the map. Location type = 1 to distinguish it as a parent station which is important in the documentation.
     query = """
-        SELECT DISTINCT stop_name 
-        FROM stops;
+        SELECT stop_name, stop_id
+        FROM stops
+        WHERE location_type = '1';
     """
     cur.execute(query)
     results = cur.fetchall()
@@ -65,7 +67,7 @@ def get_arrivals(stop_id):
 
     # Convert results to a list of route_ids
     route_ids = [row[0] for row in results]
-
+    print(route_ids)
     # routes = jsonify({"routes": route_ids})
 
     #TODO: Using the "routes" list, make appropriate API calls to MTA API. Old code is commented out.
