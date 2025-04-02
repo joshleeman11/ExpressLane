@@ -1,18 +1,21 @@
-type Stop = string;
+interface Stop {
+  stop_name: string;
+  stop_id: string;
+}
 
 interface TripStop {
-    stop_name: string;
-    arrival_time: string;
+  stop_name: string;
+  arrival_time: string;
 }
 
 interface Trip {
-    origin_time: string;
-    direction: string;
-    stops: TripStop[];
+  origin_time: string;
+  direction: string;
+  stops: TripStop[];
 }
 
 interface FTrainArrivals {
-    [trip_id: string]: Trip[];
+  [trip_id: string]: Trip[];
 }
 
 export type { Stop, TripStop, Trip, FTrainArrivals };
