@@ -57,13 +57,13 @@ const StopSelector: React.FC<StopSelectorProps> = ({
       <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
         {filteredStops.map((stop) => (
           <div
-            key={stop}
+            key={stop[1]}
             onClick={() => onSelectStop(stop)}
             className={`flex items-center justify-between p-4 transition-colors ${
               !user ? "hover:bg-gray-800 cursor-pointer" : ""
             }`}
           >
-            <span className="font-medium text-gray-200">{stop}</span>
+            <span className="font-medium text-gray-200">{stop[0]}</span>
             {user && (
               <FavoriteToggle
                 stop={stop}
