@@ -6,9 +6,13 @@ import { User } from "firebase/auth";
 export const addStopToUser = async (uid: string, stop: Stop) => {
     try {
         const userRef = doc(db, "users", uid);
-        await setDoc(userRef, {
-            stops: arrayUnion(stop),
-        }, { merge: true });
+        await setDoc(
+            userRef,
+            {
+                stops: arrayUnion(stop),
+            },
+            { merge: true }
+        );
     } catch (error) {
         console.error("Error adding stop to user:", error);
         throw error;
@@ -54,17 +58,21 @@ export const toggleFavoriteStop = async (user: User | null, stop: Stop) => {
         if (docSnap.exists()) {
             const userData = docSnap.data();
             const newFavoriteStops = userData.stops || [];
-            if (newFavoriteStops.includes(stop)) {
-                newFavoriteStops.splice(newFavoriteStops.indexOf(stop), 1);
+
+            // Find index of stop with matching stop_id
+            const existingIndex = newFavoriteStops.findIndex(
+                (favoriteStop: Stop) => favoriteStop.stop_id === stop.stop_id
+            );
+
+            if (existingIndex !== -1) {
+                // Remove the stop if it exists
+                newFavoriteStops.splice(existingIndex, 1);
             } else {
+                // Add the stop if it doesn't exist
                 newFavoriteStops.push(stop);
             }
 
-            await setDoc(
-                userDoc,
-                { stops: newFavoriteStops },
-                { merge: true }
-            );
+            await setDoc(userDoc, { stops: newFavoriteStops }, { merge: true });
         }
     }
 };

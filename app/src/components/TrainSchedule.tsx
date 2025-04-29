@@ -57,13 +57,13 @@ const TrainSchedule: React.FC<TrainScheduleProps> = ({
 
     Object.values(trainArrivals).forEach((trips) => {
         trips.forEach((trip) => {
-            trip.stops.forEach((stop) => {
-                if (!stopsMap.has(stop.stop_name)) {
-                    stopsMap.set(stop.stop_name, []);
+            trip.stops.forEach((tripStop) => {
+                if (!stopsMap.has(tripStop.stop_name.stop_name)) {
+                    stopsMap.set(tripStop.stop_name.stop_name, []);
                 }
-                if (stop.arrival_time) {
-                    stopsMap.get(stop.stop_name)?.push({
-                        time: stop.arrival_time,
+                if (tripStop.arrival_time) {
+                    stopsMap.get(tripStop.stop_name.stop_name)?.push({
+                        time: tripStop.arrival_time,
                         direction: trip.direction,
                     });
                 }
@@ -72,12 +72,17 @@ const TrainSchedule: React.FC<TrainScheduleProps> = ({
     });
 
     // Convert to array and sort by stop name
-    const allStops = Array.from(stopsMap.entries()).sort(([a], [b]) =>
-        a.localeCompare(b)
+    const allStops = Array.from(stopsMap.entries()).sort(
+        ([stopNameA], [stopNameB]) => {
+            if (!stopNameA || !stopNameB) {
+                return 0;
+            }
+            return stopNameA.localeCompare(stopNameB);
+        }
     );
 
     const filteredStops = allStops.filter(([stopName]) =>
-        stopsRequested.includes(stopName)
+        stopsRequested.some((stop) => stop.stop_name === stopName)
     );
 
     const handlePreviousStop = () => {

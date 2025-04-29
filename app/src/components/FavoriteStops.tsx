@@ -4,7 +4,7 @@ import { Stop } from "../types.ts";
 import { useAuth } from "../contexts/AuthContext.tsx";
 
 interface FavoriteStopsProps {
-    favoriteStops: string[];
+    favoriteStops: Stop[];
     onToggleFavorite: (stop: Stop) => void;
 }
 
@@ -20,10 +20,10 @@ const FavoriteStops: React.FC<FavoriteStopsProps> = ({
             </h1>
             {favoriteStops.map((stop) => (
                 <div
-                    key={stop}
+                    key={stop.stop_id}
                     className={`flex items-center justify-between cursor-pointer`}
                 >
-                    <h1>{stop}</h1>
+                    <h1>{stop.stop_name}</h1>
                     <FavoriteToggle
                         stop={stop}
                         isFavorite={true}

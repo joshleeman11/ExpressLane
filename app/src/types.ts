@@ -1,7 +1,14 @@
-type Stop = string;
+interface Stop {
+    stop_id: string;
+    stop_name: string;
+    stop_lat: number;
+    stop_lon: number;
+}
 
 interface TripStop {
-    stop_name: string;
+    stop_name: {
+        stop_name: string;
+    };
     arrival_time: string;
 }
 

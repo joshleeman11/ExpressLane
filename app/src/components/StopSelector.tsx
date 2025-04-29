@@ -17,9 +17,9 @@ const StopSelector: React.FC<StopSelectorProps> = ({
 }) => {
     const { user } = useAuth();
     const [searchQuery, setSearchQuery] = useState("");
-
+    
     const filteredStops = stops.filter((stop) =>
-        stop.toLowerCase().includes(searchQuery.toLowerCase())
+        stop.stop_name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
@@ -57,20 +57,21 @@ const StopSelector: React.FC<StopSelectorProps> = ({
             <div className="max-h-[calc(100vh-400px)] overflow-y-auto">
                 {filteredStops.map((stop) => (
                     <div
-                        key={stop}
+                        key={stop.stop_id}
                         onClick={() => onSelectStop(stop)}
                         className={`flex items-center justify-between p-4 transition-colors ${
                             !user ? "hover:bg-gray-800 cursor-pointer" : ""
                         }`}
                     >
                         <span className="font-medium text-gray-200">
-                            {stop}
+                            {stop.stop_name}
                         </span>
                         {user && (
                             <FavoriteToggle
                                 stop={stop}
                                 isFavorite={
-                                    favoriteStops?.includes(stop) ?? false
+                                    favoriteStops?.includes(stop) ??
+                                    false
                                 }
                                 onToggle={onToggleFavorite}
                             />
